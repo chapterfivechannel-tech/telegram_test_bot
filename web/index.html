@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Telegram User Test</title>
+
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #111;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        .box {
+            width: 90%;
+            max-width: 420px;
+            padding: 30px;
+            background: #1d1d1d;
+            border-radius: 20px;
+        }
+
+        h1 {
+            margin-top: 0;
+        }
+
+        .row {
+            padding: 12px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .label {
+            color: #888;
+            font-size: 13px;
+        }
+
+        .value {
+            margin-top: 5px;
+            font-size: 17px;
+            word-break: break-all;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="box">
+
+    <h1 id="title">Checking...</h1>
+
+    <div class="row">
+        <div class="label">Telegram</div>
+        <div class="value" id="telegram"></div>
+    </div>
+
+    <div class="row">
+        <div class="label">Name</div>
+        <div class="value" id="name"></div>
+    </div>
+
+    <div class="row">
+        <div class="label">Telegram ID</div>
+        <div class="value" id="id"></div>
+    </div>
+
+    <div class="row">
+        <div class="label">Username</div>
+        <div class="value" id="username"></div>
+    </div>
+
+    <div class="row">
+        <div class="label">initData</div>
+        <div class="value" id="init"></div>
+    </div>
+
+</div>
+
+<script>
+
+const tg = window.Telegram?.WebApp;
+
+if (!tg) {
+
+    document.getElementById("title").textContent =
+        "Telegram WebApp NOT found";
+
+} else {
+
+    tg.ready();
+    tg.expand();
+
+    const user = tg.initDataUnsafe?.user;
+    const initData = tg.initData;
+
+    document.getElementById("telegram").textContent =
+        "WebApp detected";
+
+    document.getElementById("init").textContent =
+        initData
+            ? `RECEIVED (${initData.length} characters)`
+            : "NOT RECEIVED";
+
+    if (user) {
+
+        document.getElementById("title").textContent =
+            `Hello, ${user.first_name}!`;
+
+        document.getElementById("name").textContent =
+            [
+                user.first_name,
+                user.last_name
+            ]
+            .filter(Boolean)
+            .join(" ");
+
+        document.getElementById("id").textContent =
+            user.id;
+
+        document.getElementById("username").textContent =
+            user.username
+                ? `@${user.username}`
+                : "No username";
+
+    } else {
+
+        document.getElementById("title").textContent =
+            "User NOT found";
+
+    }
+}
+
+</script>
+
+</body>
+</html>
