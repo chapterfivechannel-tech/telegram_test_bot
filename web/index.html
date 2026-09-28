@@ -10,49 +10,103 @@
         content="width=device-width, initial-scale=1.0"
     >
 
-    <title>Telegram User Test</title>
+    <title>Tap Game</title>
 
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
     <style>
 
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
             min-height: 100vh;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: #111;
+            background: #101010;
             color: white;
             font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
-        .box {
-            width: 90%;
-            max-width: 420px;
-            padding: 30px;
-            background: #1d1d1d;
-            border-radius: 20px;
+        .game {
+            width: min(92vw, 430px);
+            text-align: center;
         }
 
-        h1 {
-            margin-top: 0;
+        .top {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 18px;
         }
 
-        .row {
-            padding: 12px 0;
-            border-bottom: 1px solid #333;
+        .stat {
+            background: #1c1c1c;
+            padding: 12px 18px;
+            border-radius: 14px;
+            min-width: 100px;
         }
 
         .label {
-            color: #888;
-            font-size: 13px;
+            color: #777;
+            font-size: 12px;
+            margin-bottom: 4px;
         }
 
         .value {
-            margin-top: 5px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        #arena {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            background: #181818;
+            border-radius: 24px;
+            overflow: hidden;
+        }
+
+        #target {
+            position: absolute;
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            border: none;
+            background: white;
+            cursor: pointer;
+            display: none;
+            transform: translate(-50%, -50%);
+            transition: transform 0.08s;
+        }
+
+        #target:active {
+            transform: translate(-50%, -50%) scale(0.85);
+        }
+
+        #start {
+            margin-top: 20px;
+            width: 100%;
+            height: 54px;
+            border: none;
+            border-radius: 16px;
+            background: white;
+            color: black;
             font-size: 17px;
-            word-break: break-all;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #message {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 22px;
+            font-weight: bold;
         }
 
     </style>
@@ -61,31 +115,37 @@
 
 <body>
 
-<div class="box">
+<div class="game">
 
-    <h1 id="title">Connecting...</h1>
+    <div class="top">
 
-    <div class="row">
-        <div class="label">Backend</div>
-        <div class="value" id="backend">
-            Connecting...
+        <div class="stat">
+            <div class="label">SCORE</div>
+            <div class="value" id="score">0</div>
         </div>
+
+        <div class="stat">
+            <div class="label">TIME</div>
+            <div class="value" id="time">10</div>
+        </div>
+
     </div>
 
-    <div class="row">
-        <div class="label">Name</div>
-        <div class="value" id="name"></div>
+
+    <div id="arena">
+
+        <div id="message">
+            TAP START
+        </div>
+
+        <button id="target"></button>
+
     </div>
 
-    <div class="row">
-        <div class="label">Telegram ID</div>
-        <div class="value" id="id"></div>
-    </div>
 
-    <div class="row">
-        <div class="label">Username</div>
-        <div class="value" id="username"></div>
-    </div>
+    <button id="start">
+        START GAME
+    </button>
 
 </div>
 
@@ -94,96 +154,118 @@
 
 const tg = window.Telegram?.WebApp;
 
-async function connectTelegram() {
-
-    if (!tg) {
-
-        document.getElementById("title").textContent =
-            "Telegram WebApp NOT found";
-
-        return;
-    }
-
+if (tg) {
     tg.ready();
     tg.expand();
-
-    const initData = tg.initData;
-
-    if (!initData) {
-
-        document.getElementById("title").textContent =
-            "No Telegram data";
-
-        document.getElementById("backend").textContent =
-            "initData is empty";
-
-        return;
-    }
-
-    try {
-
-        const response = await fetch(
-            "https://chapterfivechannel.pythonanywhere.com/telegram-auth",
-            {
-                method: "POST",
-
-                headers: {
-                    "Content-Type": "application/json"
-                },
-
-                body: JSON.stringify({
-                    initData: initData
-                })
-            }
-        );
-
-        const result = await response.json();
-
-        if (!result.ok) {
-
-            throw new Error(
-                result.error || "Authentication failed"
-            );
-        }
-
-        const user = result.user;
-
-        document.getElementById("title").textContent =
-            `Hello, ${user.first_name}!`;
-
-        document.getElementById("backend").textContent =
-            "Telegram user verified by Python";
-
-        document.getElementById("name").textContent =
-            [
-                user.first_name,
-                user.last_name
-            ]
-            .filter(Boolean)
-            .join(" ");
-
-        document.getElementById("id").textContent =
-            user.id;
-
-        document.getElementById("username").textContent =
-            user.username
-                ? `@${user.username}`
-                : "No username";
-
-    } catch (error) {
-
-        console.error(error);
-
-        document.getElementById("title").textContent =
-            "Connection failed";
-
-        document.getElementById("backend").textContent =
-            error.message;
-    }
 }
 
 
-connectTelegram();
+const arena = document.getElementById("arena");
+const target = document.getElementById("target");
+const startButton = document.getElementById("start");
+const message = document.getElementById("message");
+
+const scoreElement = document.getElementById("score");
+const timeElement = document.getElementById("time");
+
+
+let score = 0;
+let timeLeft = 10;
+let timer = null;
+let playing = false;
+
+
+function moveTarget() {
+
+    const padding = 45;
+
+    const x =
+        padding +
+        Math.random() *
+        (arena.clientWidth - padding * 2);
+
+    const y =
+        padding +
+        Math.random() *
+        (arena.clientHeight - padding * 2);
+
+    target.style.left = `${x}px`;
+    target.style.top = `${y}px`;
+
+}
+
+
+function startGame() {
+
+    if (playing) return;
+
+    playing = true;
+
+    score = 0;
+    timeLeft = 10;
+
+    scoreElement.textContent = score;
+    timeElement.textContent = timeLeft;
+
+    message.style.display = "none";
+    target.style.display = "block";
+
+    startButton.disabled = true;
+    startButton.textContent = "PLAYING...";
+
+    moveTarget();
+
+    timer = setInterval(() => {
+
+        timeLeft--;
+
+        timeElement.textContent = timeLeft;
+
+        if (timeLeft <= 0) {
+
+            endGame();
+
+        }
+
+    }, 1000);
+
+}
+
+
+function endGame() {
+
+    clearInterval(timer);
+
+    playing = false;
+
+    target.style.display = "none";
+
+    message.textContent =
+        `GAME OVER — ${score} POINTS`;
+
+    message.style.display = "flex";
+
+    startButton.disabled = false;
+    startButton.textContent = "PLAY AGAIN";
+
+}
+
+
+target.addEventListener("click", () => {
+
+    if (!playing) return;
+
+    score++;
+
+    scoreElement.textContent = score;
+
+    moveTarget();
+
+});
+
+
+startButton.addEventListener("click", startGame);
+
 
 </script>
 
