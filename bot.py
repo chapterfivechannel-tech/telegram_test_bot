@@ -1,4 +1,5 @@
 from flask import Flask, request, jsonify
+from flask_cors import CORS
 import os
 import json
 import hashlib
@@ -6,6 +7,7 @@ import hmac
 from urllib.parse import parse_qsl
 
 app = Flask(__name__)
+CORS(app, resources={r"/telegram-auth": {"origins": "*"}})
 
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 
